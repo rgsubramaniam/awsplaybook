@@ -1,0 +1,25 @@
+---
+- name: Provision EC2 in AWS via Terraform
+  hosts: localhost
+  gather_facts: false
+  vars:
+    aws_access_key: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
+    aws_secret_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
+  tasks:
+
+    - name: Run terraform init
+      command: terraform init
+      args:
+        chdir: "{{ playbook_dir }}/terraform"
+
+    - name: Write terraform.tfvars
+      copy:
+        dest: "{{ playbook_dir }}/terraform/terraform.tfvars"
+        content: |
+          aws_access_key = "{{ aws_access_key }}"
+          aws_secret_key = "{{ aws_secret_key }}"
+
+    - name: Apply terraform
+      command: terraform apply -auto-approve
+      args:
+        chdir: "{{ playbook_dir }}/terraform"
